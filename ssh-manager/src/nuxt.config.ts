@@ -4,8 +4,11 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/eslint',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    '@vueuse/nuxt'
   ],
+
+  ssr: false,
 
   devtools: {
     enabled: true
@@ -13,10 +16,26 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  ssr: false,
+  ignore: ['**/src-tauri/**'],
 
   routeRules: {
     '/': { prerender: true }
+  },
+
+  vite: {
+    clearScreen: false,
+    // Enable environment variables
+    // https://v2.tauri.app/reference/environment-variables/
+    envPrefix: ['VITE_', 'TAURI_'],
+    server: {
+      strictPort: true
+    },
+    optimizeDeps: {
+      include: [
+        '@tauri-apps/api/core',
+        'pinia'
+      ]
+    }
   },
 
   eslint: {
@@ -26,16 +45,5 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
-  },
-
-  vite: {
-    clearScreen: false,
-    // Enable environment variables
-    // https://v2.tauri.app/reference/environment-variables/
-    envPrefix: ['VITE_', 'TAURI_'],
-    server: {
-      strictPort: true,
-    },
-  },
-  ignore: ['**/src-tauri/**'],
+  }
 })
