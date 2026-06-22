@@ -41,3 +41,22 @@ CI order (src/.github/workflows/ci.yml): `pnpm install` → `pnpm run lint` → 
 - `src/main.ts` is **leftover Tauri vanilla template files** — the Nuxt app lives in `src/app/`
 - Nuxt auto-imports components from `app/components/`, pages from `app/pages/`
 - TypeScript v6.0.3, Nuxt 4, Nuxt UI 4, Vue 3, vue-tsc v3.3.5
+
+## Nuxt guidelines
+The frontend app is built with Nuxt 4 using TypeScript, Nuxt UI v4, and Pinia for state management.
+
+1. Use strict TypeScript for all files.
+2. Follow the Nuxt 4 directory structure and conventions.
+3. Use auto-imports for components, composables, and stores to simplify imports.
+4. Use the Nuxt 4 layers feature to organize code by feature and maintain separation of concerns.
+5. Use the Composition API for logic encapsulation and reusability.
+6. Use the defined API conventions for creating DTOs and API services to maintain consistency.
+7. Use the defined test structure and run tests regularly to ensure code quality and catch issues early.
+8. Use i18n for localization and keep translation files organized in the `lang/locales/` directory.
+9. Apply the correct separation of responsibilities.
+10. Use Pinia for state management and keep stores focused on api calls, state and actions related to that state, without UI logic.
+11. Stores must return all reactive states and getters for correct SSR hydration.
+12. Composables should orchestrate ui communication with store, contain reusable logic that can be shared across components and stores, and should not contain GLOBAL state management, but can use local reactive state.
+13. Create components with single responsibility and encapsulation of non shared behaviour, and place them in the appropriate directory.
+14. Use defineModel for defining one or more component v-model bindings, instead of emitting custom events for two-way data binding. This simplifies component usage and improves readability.
+15. Pages should only contain UI logic and should call composables.
