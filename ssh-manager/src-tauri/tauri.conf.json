@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "dev.erdu.ssh-manager",
   "build": {
-    "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "cd src && pnpm dev",
+    "devUrl": "http://localhost:3000",
+    "beforeBuildCommand": "cd src && pnpm generate",
     "frontendDist": "../dist"
   },
   "app": {
