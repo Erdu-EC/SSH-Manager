@@ -39,8 +39,11 @@ CI order (src/.github/workflows/ci.yml): `pnpm install` → `pnpm run lint` → 
 ## Notes
 
 - `src/main.ts` is **leftover Tauri vanilla template files** — the Nuxt app lives in `src/app/`
-- Nuxt auto-imports components from `app/components/`, pages from `app/pages/`
+- Nuxt auto-imports components from `app/components/`, pages from `app/pages/`, layouts from `app/layouts/`, plugins from `app/plugins/`, stores from `app/stores/`
 - TypeScript v6.0.3, Nuxt 4, Nuxt UI 4, Vue 3, vue-tsc v3.3.5
+- Nuxt Layout: `app.vue` wraps `<NuxtLayout><NuxtPage /></NuxtLayout>`; default layout uses `UDashboardGroup` + `UDashboardSidebar` + `UDashboardSearch` + `UDashboardPanel` + `UDashboardNavbar`
+- Session page uses `definePageMeta({ layout: false })` to opt out of default layout, renders its own structure
+- `app/plugins/init.client.ts` calls `profileStore.fetchAll()` on startup — needed for data to appear
 
 ## Nuxt guidelines
 The frontend app is built with Nuxt 4 using TypeScript, Nuxt UI v4, and Pinia for state management.
