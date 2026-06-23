@@ -1,11 +1,10 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2026-06-22',
 
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
-    '@vueuse/nuxt'
+    '@vueuse/nuxt',
+    '@pinia/nuxt'
   ],
 
   ssr: false,
@@ -21,11 +20,10 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true }
   },
+  compatibilityDate: '2026-06-22',
 
   vite: {
     clearScreen: false,
-    // Enable environment variables
-    // https://v2.tauri.app/reference/environment-variables/
     envPrefix: ['VITE_', 'TAURI_'],
     server: {
       strictPort: true
@@ -33,10 +31,12 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         '@tauri-apps/api/core',
+        '@tauri-apps/api/webview',
         'pinia'
       ]
     }
   },
+  telemetry: false,
 
   eslint: {
     config: {

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ssh-manager",
+  "productName": "SSH Explorer",
   "version": "0.1.0",
-  "identifier": "dev.erdu.ssh-manager",
+  "identifier": "dev.erdu.ssh-explorer",
   "build": {
     "beforeDevCommand": "cd src && pnpm dev",
     "devUrl": "http://localhost:3000",
@@ -13,9 +13,11 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "ssh-manager",
-        "width": 800,
-        "height": 600
+        "title": "SSH Explorer",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 900,
+        "minHeight": 600
       }
     ],
     "security": {
