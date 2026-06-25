@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { AppProfile } from '~/types'
 
-const router = useRouter()
 const profileStore = useProfileStore()
 const connectionStore = useConnectionStore()
 const { t } = useI18n()
@@ -28,7 +27,7 @@ async function handleConnect(profile: AppProfile) {
       password: null,
       identity_file: profile.identity_file
     })
-    router.push(`/session/${sessionId}`)
+    navigateTo(`/session/${sessionId}`)
   } catch (e) {
     const msg = String(e)
     const short = msg.length > 120 ? msg.slice(0, 120) + '…' : msg

@@ -5,7 +5,6 @@ import { LazyCommonCommandPalette } from '#components'
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const router = useRouter()
 
 const colorMode = useColorMode()
 const overlay = useOverlay()
@@ -101,7 +100,7 @@ const commands: Command[] = [
 
 onMounted(() => {
   if (!session.value) {
-    router.push('/')
+    navigateTo('/')
   }
 })
 
@@ -130,7 +129,7 @@ function toggleTerminal() {
 
 async function handleDisconnect() {
   await connectionStore.disconnect(sessionId.value)
-  router.push('/')
+  navigateTo('/')
 }
 
 useEventListener(window, 'keydown', (e: KeyboardEvent) => {
