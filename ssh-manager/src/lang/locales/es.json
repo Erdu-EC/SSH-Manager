@@ -1,0 +1,53 @@
+{
+  "connectionForm": {
+    "titleNew": "Nuevo Perfil",
+    "titleEdit": "Editar Perfil",
+    "name": "Nombre",
+    "namePlaceholder": "Mi Servidor",
+    "host": "Servidor (Host)",
+    "hostPlaceholder": "ejemplo.com",
+    "port": "Puerto",
+    "username": "Usuario",
+    "usernamePlaceholder": "root",
+    "auth": "Autenticación",
+    "authKey": "Archivo de Llave",
+    "authPassword": "Contraseña",
+    "identityFile": "Archivo de Identidad",
+    "password": "Contraseña",
+    "errors": {
+      "required": "Nombre, servidor y usuario son obligatorios"
+    },
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "create": "Crear Perfil"
+  },
+  "confirmDialog": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "profiles": {
+    "noProfiles": "No hay Perfiles SSH",
+    "addProfileHint": "Añade un perfil para empezar, o revisa tu archivo ~/.ssh/config.",
+    "connectionFailed": "Error de conexión",
+    "deleteFailed": "Error al eliminar",
+    "connecting": "Conectando...",
+    "connect": "Conectar",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "language": {
+    "en": "Inglés",
+    "es": "Español"
+  },
+  "dashboard": {
+    "profiles": "Perfiles",
+    "sshConfig": "Configuración SSH",
+    "sshKeys": "Llaves SSH",
+    "newProfile": "Nuevo Perfil"
+  },
+  "layout": {
+    "navigation": "Navegación",
+    "dashboard": "Panel de Control",
+    "search": "Buscar (Ctrl+K)"
+  }
+}

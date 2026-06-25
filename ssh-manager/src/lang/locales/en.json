@@ -1,0 +1,53 @@
+{
+  "connectionForm": {
+    "titleNew": "New Profile",
+    "titleEdit": "Edit Profile",
+    "name": "Name",
+    "namePlaceholder": "My Server",
+    "host": "Host",
+    "hostPlaceholder": "example.com",
+    "port": "Port",
+    "username": "Username",
+    "usernamePlaceholder": "root",
+    "auth": "Authentication",
+    "authKey": "Key File",
+    "authPassword": "Password",
+    "identityFile": "Identity File",
+    "password": "Password",
+    "errors": {
+      "required": "Name, host, and username are required"
+    },
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "create": "Create Profile"
+  },
+  "confirmDialog": {
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "profiles": {
+    "noProfiles": "No SSH Profiles",
+    "addProfileHint": "Add a profile to get started, or check your ~/.ssh/config file.",
+    "connectionFailed": "Connection failed",
+    "deleteFailed": "Delete failed",
+    "connecting": "Connecting...",
+    "connect": "Connect",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "language": {
+    "en": "English",
+    "es": "Spanish"
+  },
+  "dashboard": {
+    "profiles": "Profiles",
+    "sshConfig": "SSH Config",
+    "sshKeys": "SSH Keys",
+    "newProfile": "New Profile"
+  },
+  "layout": {
+    "navigation": "Navigation",
+    "dashboard": "Dashboard",
+    "search": "Search (Ctrl+K)"
+  }
+}
