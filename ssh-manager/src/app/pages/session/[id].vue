@@ -47,7 +47,7 @@ const showTerminal = ref(false)
 const terminalHeight = ref(450)
 const isDraggingTerminal = ref(false)
 
-function onTerminalDragStart(e: MouseEvent) {
+function onTerminalDragStart(_e: MouseEvent) {
   isDraggingTerminal.value = true
   document.addEventListener('mousemove', onTerminalDrag)
   document.addEventListener('mouseup', onTerminalDragEnd)
