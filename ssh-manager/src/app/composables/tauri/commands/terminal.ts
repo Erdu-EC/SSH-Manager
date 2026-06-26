@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 
-export async function createTerminal(sessionId: string, rows: number, cols: number, cwd: string | null = null): Promise<string> {
-  return invoke<string>('create_terminal', { sessionId, rows, cols, cwd })
+export async function createTerminal(sessionId: string, terminalId: string, rows: number, cols: number): Promise<string> {
+  return invoke<string>('create_terminal', { sessionId, terminalId, rows, cols })
 }
 
 export async function closeTerminal(terminalId: string): Promise<void> {

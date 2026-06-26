@@ -112,7 +112,7 @@ const commands: Command[] = [
     label: 'New Terminal Tab',
     icon: 'i-lucide-plus',
     shortcut: 'Ctrl+Shift+T',
-    action: () => terminalStore.createTab(sessionId.value, 40, 120, currentExplorerPath.value)
+    action: () => terminalStore.createTab(sessionId.value)
   },
   {
     id: 'disconnect',
@@ -146,7 +146,7 @@ function toggleTerminal() {
   if (!showTerminal.value) {
     const existingTabs = terminalStore.tabsForSession(sessionId.value)
     if (existingTabs.length === 0) {
-      terminalStore.createTab(sessionId.value, 40, 120, currentExplorerPath.value)
+      terminalStore.createTab(sessionId.value)
     }
   }
   showTerminal.value = !showTerminal.value
@@ -174,7 +174,7 @@ useEventListener(window, 'keydown', (e: KeyboardEvent) => {
 useEventListener(window, 'keydown', (e: KeyboardEvent) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
     e.preventDefault()
-    terminalStore.createTab(sessionId.value, 40, 120, currentExplorerPath.value)
+    terminalStore.createTab(sessionId.value)
   }
 })
 

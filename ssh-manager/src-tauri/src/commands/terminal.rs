@@ -13,11 +13,12 @@ pub async fn create_terminal(
     app_handle: tauri::AppHandle,
     session_manager: tauri::State<'_, Arc<Mutex<SessionManager>>>,
     session_id: String,
+    terminal_id: String,
     rows: u32,
-    cols: u32,
-    cwd: Option<String>,
+    cols: u32
 ) -> Result<String, String> {
     let sid = Uuid::parse_str(&session_id).map_err(|e| format!("Invalid session ID: {e}"))?;
+    let tid = Uuid::parse_str(&terminal_id).map_err(|e| format!("Invalid terminal ID: {e}"))?;
     let mut sm = session_manager.lock().await;
     let conn = sm
         .get_session_mut(&sid)
@@ -47,11 +48,6 @@ pub async fn create_terminal(
         .await
         .map_err(|e| format!("Shell request failed: {e}"))?;
 
-    if let Some(dir) = cwd {
-        let _ = channel.data_bytes(bytes::Bytes::from(format!("cd {}\n", dir).into_bytes())).await;
-    }
-
-    let tid = Uuid::new_v4();
     let (tx, mut rx) = mpsc::channel::<TerminalCmd>(64);
 
     let app = app_handle.clone();

@@ -13,26 +13,29 @@ export const useTerminalStore = defineStore('terminal', () => {
     return (sessionId: string) => tabs.value.filter(t => t.sessionId === sessionId)
   })
 
-  async function createTab(sessionId: string, rows = 40, cols = 120, cwd?: string) {
+  function createTab(sessionId: string) {
+    const terminalId = crypto.randomUUID()
+    const tab: TerminalTabState = {
+      id: terminalId,
+      sessionId,
+      label: `Term ${tabs.value.length + 1}`
+    }
+    tabs.value.push(tab)
+    activeTabId.value = terminalId
+    return terminalId
+  }
+
+  async function initTerminal(sessionId: string, terminalId: string, rows: number, cols: number) {
     try {
       const tauri = useTauri()
-      const terminalId = await tauri.commands.terminal.createTerminal(
+      await tauri.commands.terminal.createTerminal(
         sessionId,
+        terminalId,
         rows,
-        cols,
-        cwd ?? null
+        cols
       )
-      const tab: TerminalTabState = {
-        id: terminalId,
-        sessionId,
-        label: `Term ${tabs.value.length + 1}`
-      }
-      tabs.value.push(tab)
-      activeTabId.value = terminalId
-      return terminalId
     } catch (e) {
-      console.error('Failed to create terminal:', e)
-      return null
+      console.error('Failed to init terminal backend:', e)
     }
   }
 
@@ -93,6 +96,7 @@ export const useTerminalStore = defineStore('terminal', () => {
     activeTab,
     tabsForSession,
     createTab,
+    initTerminal,
     closeTab,
     setActiveTab,
     writeToTab,

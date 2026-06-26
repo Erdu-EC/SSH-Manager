@@ -18,7 +18,17 @@ let resizeObserver: ResizeObserver | null = null
 
 const { setup, cleanup } = useTerminalSync()
 
-onMounted(() => {
+onMounted(async () => {
+  if (!termRef.value) return
+
+  // Wait for web fonts to load.
+  await document.fonts.ready
+
+  // Ensure the container is actually visible (not hidden or 0 height due to transitions)
+  while (termRef.value && (termRef.value.offsetHeight === 0 || termRef.value.offsetWidth === 0)) {
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+
   if (!termRef.value) return
 
   fitAddon = new FitAddon()
@@ -29,15 +39,55 @@ onMounted(() => {
     fontFamily: '\'JetBrains Mono\', \'Fira Code\', \'Cascadia Code\', monospace',
     allowTransparency: true,
     theme: {
-      background: 'transparent'
+      background: 'transparent',
+      foreground: '#d4d4d4',
+      cursor: '#10b981',
+      cursorAccent: '#10b981',
+      selectionBackground: 'rgba(16, 185, 129, 0.3)',
+      black: '#000000',
+      red: '#ef4444',
+      green: '#10b981',
+      yellow: '#f59e0b',
+      blue: '#3b82f6',
+      magenta: '#8b5cf6',
+      cyan: '#06b6d4',
+      white: '#ffffff',
+      brightBlack: '#666666',
+      brightRed: '#f87171',
+      brightGreen: '#34d399',
+      brightYellow: '#fbbf24',
+      brightBlue: '#60a5fa',
+      brightMagenta: '#a78bfa',
+      brightCyan: '#22d3ee',
+      brightWhite: '#ffffff'
     }
   })
 
   terminal.loadAddon(fitAddon)
-  terminal.open(termRef.value)
-  fitAddon.fit()
 
+  // Only open once the container is ready
+  terminal.open(termRef.value)
+
+  // Try fitting immediately to get exact rows and columns based on the UI
+  try {
+    fitAddon.fit()
+  } catch (_e) {
+    // Ignore fit errors if container is still too small
+  }
+
+  // 1. Attach listeners FIRST so no data is dropped (terminal-output from backend to frontend)
   setup(props.terminalId, terminal)
+
+  const terminalStore = useTerminalStore()
+
+  // 2. NOW request the backend to create the PTY and start sending data.
+  // Because listeners are attached and size is exact, the MOTD will format perfectly!
+  await terminalStore.initTerminal(props.sessionId, props.terminalId, terminal.rows, terminal.cols)
+
+  // 4. Now that backend has created the terminal, we can safely send resize and input events
+  terminal.onResize((size) => {
+    terminalStore.resizeTab(props.terminalId, size.rows, size.cols)
+  })
 
   if (termRef.value) {
     resizeObserver = new ResizeObserver(() => {
