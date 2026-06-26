@@ -44,6 +44,31 @@ const currentExplorerPath = computed(() =>
 
 const session = computed(() => connectionStore.sessions.get(sessionId.value))
 const showTerminal = ref(false)
+const terminalHeight = ref(450)
+const isDraggingTerminal = ref(false)
+
+function onTerminalDragStart(e: MouseEvent) {
+  isDraggingTerminal.value = true
+  document.addEventListener('mousemove', onTerminalDrag)
+  document.addEventListener('mouseup', onTerminalDragEnd)
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'row-resize'
+}
+
+function onTerminalDrag(e: MouseEvent) {
+  if (!isDraggingTerminal.value) return
+  const newHeight = window.innerHeight - e.clientY
+  terminalHeight.value = Math.max(150, Math.min(newHeight, window.innerHeight - 150))
+}
+
+function onTerminalDragEnd() {
+  isDraggingTerminal.value = false
+  document.removeEventListener('mousemove', onTerminalDrag)
+  document.removeEventListener('mouseup', onTerminalDragEnd)
+  document.body.style.userSelect = ''
+  document.body.style.cursor = ''
+}
+
 const { listenForFileDrop } = useDragUpload(sessionId)
 
 const connectionDuration = ref('')
@@ -258,8 +283,19 @@ useEventListener(window, 'keydown', (e: KeyboardEvent) => {
       </div>
 
       <div
-        class="shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
-        :class="showTerminal ? 'h-[40vh] border-t border-[var(--ui-border)]' : 'h-0'"
+        v-if="showTerminal"
+        class="h-1.5 z-10 -mt-1.5 cursor-row-resize bg-transparent hover:bg-primary/50 transition-colors"
+        :class="{ 'bg-primary/50': isDraggingTerminal }"
+        @mousedown.prevent="onTerminalDragStart"
+      />
+
+      <div
+        class="shrink-0 overflow-hidden"
+        :class="[
+          showTerminal ? 'border-t border-[var(--ui-border)]' : '',
+          isDraggingTerminal ? '' : 'transition-all duration-300 ease-in-out'
+        ]"
+        :style="{ height: showTerminal ? `${terminalHeight}px` : '0px' }"
       >
         <div class="h-full flex flex-col min-h-0">
           <div class="flex items-center justify-between px-4 py-1.5 border-b border-[var(--ui-border)] shrink-0">
