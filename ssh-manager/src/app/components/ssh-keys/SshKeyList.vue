@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const profileStore = useProfileStore()
+const { showInFolder } = useSshKeyActions()
 
 const keys = computed(() => profileStore.sshKeys)
 const loading = computed(() => profileStore.loading)
@@ -9,15 +10,6 @@ function formatTimestamp(ts: string): string {
   const seconds = Number(ts)
   if (isNaN(seconds)) return ts
   return new Date(seconds * 1000).toLocaleDateString()
-}
-
-async function showInFolder(path: string) {
-  try {
-    const tauri = useTauri()
-    await tauri.commands.shell.showInFolder(path)
-  } catch (e) {
-    console.error('Failed to open folder:', e)
-  }
 }
 </script>
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { h, resolveComponent } from 'vue'
-import { LazyNewFolderDialog, LazyConfirmDialog } from '#components'
 import type { FileEntry } from '~/types'
 
 const UIcon = resolveComponent('UIcon')
@@ -21,37 +20,7 @@ const rowSelection = ref<Record<string, boolean>>({})
 const treeItems = ref<TreeFileItem[]>([])
 const expandedKeys = ref<string[]>([])
 
-function formatSize(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`
-}
-
-function formatPermissions(perms: string | null, isDirectory: boolean): string {
-  if (!perms) return ''
-  const octal = perms.length > 3 ? perms.slice(-3) : perms
-  const typeChar = isDirectory ? 'd' : '-'
-  const n = parseInt(octal, 8)
-  const rwx = (bits: number) => {
-    const r = (bits & 4) ? 'r' : '-'
-    const w = (bits & 2) ? 'w' : '-'
-    const x = (bits & 1) ? 'x' : '-'
-    return r + w + x
-  }
-  const owner = rwx(Math.floor(n / 64))
-  const group = rwx(Math.floor((n % 64) / 8))
-  const other = rwx(n % 8)
-  return `${typeChar}${owner}${group}${other} (${octal})`
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '-'
-  const ts = Number(dateStr)
-  const d = Number.isFinite(ts) ? new Date(ts * 1000) : new Date(dateStr)
-  if (isNaN(d.getTime())) return '-'
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
+const { formatSize, formatPermissions, formatDate, getFileIcon, getIconName } = useFileFormatter()
 
 const columns = [
   {
@@ -107,60 +76,6 @@ interface TreeFileItem {
   disabled?: boolean
   data?: FileEntry & { path: string, childrenLoaded?: boolean }
   children?: TreeFileItem[]
-}
-
-function getFileIcon(name: string): string {
-  const ext = name.split('.').pop()?.toLowerCase()
-  const icons: Record<string, string> = {
-    'ts': 'i-lucide-file-code', 'tsx': 'i-lucide-file-code',
-    'js': 'i-lucide-file-code', 'jsx': 'i-lucide-file-code',
-    'rs': 'i-lucide-file-code', 'vue': 'i-lucide-file-code',
-    'json': 'i-lucide-file-json',
-    'md': 'i-lucide-file-text', 'txt': 'i-lucide-file-text',
-    'yml': 'i-lucide-file-text', 'yaml': 'i-lucide-file-text',
-    'toml': 'i-lucide-file-text',
-    'sh': 'i-lucide-terminal', 'bash': 'i-lucide-terminal',
-    'png': 'i-lucide-image', 'jpg': 'i-lucide-image',
-    'jpeg': 'i-lucide-image', 'gif': 'i-lucide-image',
-    'svg': 'i-lucide-image', 'ico': 'i-lucide-image',
-    'zip': 'i-lucide-archive', 'tar': 'i-lucide-archive',
-    'gz': 'i-lucide-archive', 'bz2': 'i-lucide-archive',
-    '7z': 'i-lucide-archive'
-  }
-  return ext && icons[ext] ? icons[ext] : 'i-lucide-file'
-}
-
-function getIconName(name: string): string {
-  const ext = name.split('.').pop()?.toLowerCase()
-  const icons: Record<string, string> = {
-    'ts': 'vscode-icons:file-type-typescript',
-    'tsx': 'vscode-icons:file-type-typescript',
-    'js': 'vscode-icons:file-type-js',
-    'jsx': 'vscode-icons:file-type-reactjs',
-    'rs': 'vscode-icons:file-type-rust',
-    'vue': 'vscode-icons:file-type-vue',
-    'json': 'vscode-icons:file-type-json',
-    'md': 'vscode-icons:file-type-markdown',
-    'txt': 'lucide:file-text',
-    'yml': 'vscode-icons:file-type-yaml',
-    'yaml': 'vscode-icons:file-type-yaml',
-    'toml': 'vscode-icons:file-type-toml',
-    'sh': 'vscode-icons:file-type-shell',
-    'bash': 'vscode-icons:file-type-shell',
-    'zsh': 'vscode-icons:file-type-shell',
-    'png': 'lucide:image',
-    'jpg': 'lucide:image',
-    'jpeg': 'lucide:image',
-    'gif': 'lucide:image',
-    'svg': 'lucide:image',
-    'ico': 'lucide:image',
-    'zip': 'lucide:archive',
-    'tar': 'lucide:archive',
-    'gz': 'lucide:archive',
-    'bz2': 'lucide:archive',
-    '7z': 'lucide:archive'
-  }
-  return ext && icons[ext] ? icons[ext] : 'lucide:file'
 }
 
 function joinPath(parent: string, child: string): string {
@@ -316,6 +231,32 @@ onMounted(() => {
   explorerStore.navigateTo(props.sessionId, '/')
 })
 
+const contextEntry = ref<FileEntry | null>(null)
+const contextPos = ref({ x: 0, y: 0 })
+const contextVisible = ref(false)
+
+function closeContextMenu() {
+  contextVisible.value = false
+}
+
+const {
+  deleteSelected,
+  handleRename,
+  handleDeleteAction,
+  handleCopyPath,
+  handleProperties,
+  openNewFolder
+} = useExplorerActions(
+  props.sessionId,
+  entries,
+  currentPath,
+  selectedPath,
+  rowSelection,
+  contextEntry,
+  closeContextMenu,
+  formatSize
+)
+
 useEventListener(window, 'keydown', (e: KeyboardEvent) => {
   if ((e.key === 'Delete' || e.key === 'Del') && selectedPath.value) {
     e.preventDefault()
@@ -325,51 +266,6 @@ useEventListener(window, 'keydown', (e: KeyboardEvent) => {
     closeContextMenu()
   }
 })
-
-const overlay = useOverlay()
-const toast = useToast()
-
-const newFolderDialog = overlay.create(LazyNewFolderDialog)
-const confirmDialog = overlay.create(LazyConfirmDialog)
-
-async function deleteSelected() {
-  if (!selectedPath.value) return
-
-  const name = selectedPath.value.split('/').pop() || ''
-  const entry = entries.value.find(e => e.path === selectedPath.value)
-  const isDir = entry?.is_directory ?? false
-
-  const confirmed = await confirmDialog.open({
-    title: isDir ? 'Delete directory' : 'Delete file',
-    description: isDir
-      ? `Are you sure you want to delete "${name}" and all its contents?`
-      : `Are you sure you want to delete "${name}"?`,
-    confirmLabel: isDir ? 'Delete directory' : 'Delete file',
-    confirmColor: 'error'
-  })
-
-  if (!confirmed) return
-
-  try {
-    await explorerStore.removeEntry(props.sessionId, selectedPath.value, isDir)
-    selectedPath.value = null
-    rowSelection.value = {}
-  } catch (e) {
-    toast.add({
-      title: 'Failed to delete',
-      description: String(e).slice(0, 200),
-      color: 'error',
-      icon: 'i-lucide-trash-2',
-      duration: 5000
-    })
-  }
-}
-
-// Context menu
-
-const contextEntry = ref<FileEntry | null>(null)
-const contextPos = ref({ x: 0, y: 0 })
-const contextVisible = ref(false)
 
 function onTableContextMenu(e: MouseEvent) {
   e.preventDefault()
@@ -383,106 +279,6 @@ function onTableContextMenu(e: MouseEvent) {
   selectedPath.value = entry.path
   contextPos.value = { x: e.clientX, y: e.clientY }
   contextVisible.value = true
-}
-
-function closeContextMenu() {
-  contextVisible.value = false
-}
-
-async function handleRename() {
-  const entry = contextEntry.value
-  if (!entry) return
-  closeContextMenu()
-  const oldName = entry.name
-  const dir = entry.path.slice(0, entry.path.length - oldName.length)
-  const newName = window.prompt('Rename to:', oldName)
-  if (newName && newName !== oldName) {
-    try {
-      await explorerStore.rename(props.sessionId, entry.path, dir + newName)
-    } catch (e) {
-      toast.add({
-        title: 'Failed to rename',
-        description: String(e).slice(0, 200),
-        color: 'error',
-        icon: 'i-lucide-file-edit',
-        duration: 5000
-      })
-    }
-  }
-}
-
-async function handleDeleteAction() {
-  const entry = contextEntry.value
-  if (!entry) return
-  selectedPath.value = entry.path
-  closeContextMenu()
-
-  const isDir = entry.is_directory
-  const confirmed = await confirmDialog.open({
-    title: isDir ? 'Delete directory' : 'Delete file',
-    description: isDir
-      ? `Are you sure you want to delete "${entry.name}" and all its contents?`
-      : `Are you sure you want to delete "${entry.name}"?`,
-    confirmLabel: isDir ? 'Delete directory' : 'Delete file',
-    confirmColor: 'error'
-  })
-
-  if (!confirmed) return
-
-  try {
-    await explorerStore.removeEntry(props.sessionId, entry.path, isDir)
-    selectedPath.value = null
-    rowSelection.value = {}
-  } catch (e) {
-    toast.add({
-      title: 'Failed to delete',
-      description: String(e).slice(0, 200),
-      color: 'error',
-      icon: 'i-lucide-trash-2',
-      duration: 5000
-    })
-  }
-}
-
-function handleCopyPath() {
-  const path = contextEntry.value?.path
-  if (!path) return
-  navigator.clipboard.writeText(path)
-  toast.add({ title: 'Path copied to clipboard', color: 'neutral', duration: 2000, icon: 'i-lucide-check' })
-  closeContextMenu()
-}
-
-function handleProperties() {
-  const entry = contextEntry.value
-  if (!entry) return
-  const date = entry.modified_at ? new Date(entry.modified_at).toLocaleString() : '-'
-  const size = entry.is_directory ? '-' : formatSize(entry.size ?? 0)
-  toast.add({
-    title: entry.name,
-    description: `Path: ${entry.path}\nSize: ${size}\nModified: ${date}\nPermissions: ${entry.permissions ?? '-'}`,
-    color: 'neutral',
-    duration: 8000,
-    icon: 'i-lucide-info'
-  })
-  closeContextMenu()
-}
-
-async function openNewFolder() {
-  const folderName = await newFolderDialog.open()
-  if (!folderName) return
-  try {
-    const path = joinPath(currentPath.value, folderName)
-    await explorerStore.createDirectory(props.sessionId, path)
-  } catch (e) {
-    const msg = String(e)
-    toast.add({
-      title: 'Failed to create folder',
-      description: msg.length > 200 ? msg.slice(0, 200) + '\u2026' : msg,
-      color: 'error',
-      icon: 'i-lucide-folder-plus',
-      duration: 5000
-    })
-  }
 }
 </script>
 

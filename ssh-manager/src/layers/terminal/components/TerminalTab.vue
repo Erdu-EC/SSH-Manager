@@ -15,8 +15,8 @@ const termRef = ref<HTMLDivElement>()
 let terminal: Terminal | null = null
 let fitAddon: FitAddon | null = null
 let resizeObserver: ResizeObserver | null = null
-const cleanupFns: (() => void)[] = []
-const { call, onEvent } = useTauri()
+
+const { setup, cleanup } = useTerminalSync()
 
 onMounted(() => {
   if (!termRef.value) return
@@ -37,35 +37,7 @@ onMounted(() => {
   terminal.open(termRef.value)
   fitAddon.fit()
 
-  terminal.onData((data: string) => {
-    call('write_stdin', { terminalId: props.terminalId, data }).catch(console.error)
-  })
-
-  const unlistenOutput = onEvent<{ terminalId: string, data: string }>('terminal-output', (payload) => {
-    if (payload.terminalId === props.terminalId && terminal) {
-      const binary = atob(payload.data)
-      const bytes = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i)
-      }
-      terminal.write(bytes)
-    }
-  })
-  cleanupFns.push(unlistenOutput)
-
-  const unlistenError = onEvent<{ terminalId: string, message: string }>('terminal-error', (payload) => {
-    if (payload.terminalId === props.terminalId && terminal) {
-      terminal.writeln(`\r\n\x1b[31mError: ${payload.message}\x1b[0m`)
-    }
-  })
-  cleanupFns.push(unlistenError)
-
-  const unlistenExit = onEvent<{ terminalId: string, exitCode: number }>('terminal-exit', (payload) => {
-    if (payload.terminalId === props.terminalId && terminal) {
-      terminal.writeln(`\r\n\x1b[33mProcess exited with code ${payload.exitCode}\x1b[0m`)
-    }
-  })
-  cleanupFns.push(unlistenExit)
+  setup(props.terminalId, terminal)
 
   if (termRef.value) {
     resizeObserver = new ResizeObserver(() => {
@@ -80,7 +52,7 @@ onMounted(() => {
 onUnmounted(() => {
   resizeObserver?.disconnect()
   terminal?.dispose()
-  cleanupFns.forEach(fn => fn())
+  cleanup()
   terminal = null
   fitAddon = null
 })
